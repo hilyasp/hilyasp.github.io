@@ -1,25 +1,42 @@
-import { useState } from 'preact/hooks'
-import XillerLogo from "./assets/logo.svg";
-import "./app.css";
+import { ConfigProvider, theme } from "antd";
+import { Component, createContext } from "preact";
+import ThemeSettings from "./assets/Ant Design Theme.json";
+import { AppLayout } from "./views/app-layout/AppLayout";
 
-export function App() {
-	const [count, setCount] = useState(0);
+export type Theme = "dark" | "light";
 
-	return (
-		<>
-			<div>
-				<a href="https://xiller228.carrd.co" target="_blank">
-					<img src={XillerLogo} class="logo xiller" alt="Xiller228 carrd" />
-				</a>
-			</div>
-			<h1>Xiller228</h1>
-			<div class="card">
-				<button onClick={() => setCount((count) => count + 1)}>
-					count is {count}
-				</button>
-				<p>Test app, all content coming soon!</p>
-			</div>
-		</>
-	);
+export const ThemeContext = createContext({
+	theme: "dark" as Theme,
+	setTheme: (theme: Theme) => {},
+});
+
+export class App extends Component {
+	state = {
+		theme: (window.matchMedia("(prefers-color-scheme: dark)")
+			? "dark"
+			: "light") as Theme,
+	};
+
+	render() {
+		return (
+			<ThemeContext.Provider
+				value={{
+					theme: this.state.theme,
+					setTheme: (theme) => this.setState({ theme }),
+				}}
+			>
+				<ConfigProvider
+					theme={{
+						...ThemeSettings,
+						algorithm:
+							this.state.theme == "dark"
+								? theme.darkAlgorithm
+								: theme.defaultAlgorithm,
+					}}
+				>
+					<AppLayout />
+				</ConfigProvider>
+			</ThemeContext.Provider>
+		);
+	}
 }
-
